@@ -28,6 +28,13 @@ jobs:
           PROJECT_DIR=$(dirname $(find . -name "pubspec.yaml" -maxdepth 3 | head -n 1))
           cd "$PROJECT_DIR"
           
+          # تعديل حزمة الإعلانات في الكاش لتتوافق مع Gradle الحديث
+          ADS_GRADLE=$(find ~/.pub-cache -name "build.gradle" -path "*/google_mobile_ads*/*" | head -n 1)
+          if [ -f "$ADS_GRADLE" ]; then
+            sed -i 's/configurations.all/configurations.configureEach/g' "$ADS_GRADLE" || true
+            echo "Successfully patched google_mobile_ads build.gradle"
+          fi
+          
           # كود بايثون شامل يمنع أي تعارضات بالحزم
           python3 -c "
           import re
