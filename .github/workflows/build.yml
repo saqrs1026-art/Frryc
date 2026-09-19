@@ -28,21 +28,12 @@ jobs:
           PROJECT_DIR=$(dirname $(find . -name "pubspec.yaml" -maxdepth 3 | head -n 1))
           cd "$PROJECT_DIR"
           
-          # تعديل حزمة الإعلانات في الكاش لتتوافق مع Gradle الحديث
-          ADS_GRADLE=$(find ~/.pub-cache -name "build.gradle" -path "*/google_mobile_ads*/*" | head -n 1)
-          if [ -f "$ADS_GRADLE" ]; then
-            sed -i 's/configurations.all/configurations.configureEach/g' "$ADS_GRADLE" || true
-            echo "Successfully patched google_mobile_ads build.gradle"
-          fi
-          
-          # كود بايثون شامل يمنع أي تعارضات بالحزم
+          # كود بايثون لمنع تعارضات الحزم
           python3 -c "
           import re
           with open('pubspec.yaml', 'r') as f:
               content = f.read()
-          
           content = re.sub(r'dependency_overrides:.*', '', content, flags=re.DOTALL)
-          
           overrides = '''
           dependency_overrides:
             collection: ^1.19.1
@@ -50,12 +41,17 @@ jobs:
             flutter_local_notifications: ^17.2.4
           '''
           content += '\n' + overrides
-          
           with open('pubspec.yaml', 'w') as f:
               f.write(content)
           "
           
+          # 1. جلب الحزم أولاً لتنزل في الكاش
           flutter pub get
+          
+          # 2. تعديل ملفات الكاش فور تحميلها لتتطابق مع Gradle الحديث
+          find ~/.pub-cache -type f -name "build.gradle" -exec sed -i 's/configurations.all/configurations.configureEach/g' {} + || true
+          
+          # 3. بناء التطبيق نهائياً
           flutter build apk --release
       - name: Upload APK
         uses: actions/upload-artifact@v4
