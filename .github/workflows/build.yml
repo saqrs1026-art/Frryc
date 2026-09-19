@@ -19,14 +19,24 @@ jobs:
           PROJECT_DIR=$(dirname $(find . -name "pubspec.yaml" -maxdepth 3 | head -n 1))
           cd "$PROJECT_DIR"
           
-          # إضافة التجاوزات بالنسخ الصحيحة والمتوافقة تماماً
+          # كود بايثون شامل يحل جميع مشاكل التعارضات دفعة واحدة وبشكل نهائي
           python3 -c "
+          import re
           with open('pubspec.yaml', 'r') as f:
               content = f.read()
-          if 'dependency_overrides:' in content:
-              content = content.replace('dependency_overrides:', 'dependency_overrides:\n  collection: ^1.19.1\n  google_mobile_ads: ^5.2.0')
-          else:
-              content += '\ndependency_overrides:\n  collection: ^1.19.1\n  google_mobile_ads: ^5.2.0\n'
+          
+          # إزالة أي قسم dependency_overrides قديم لمنع التكرار
+          content = re.sub(r'dependency_overrides:.*', '', content, flags=re.DOTALL)
+          
+          # إضافة جميع التجاوزات الشاملة لحل مشاكل collection والإعلانات والإشعارات
+          overrides = '''
+          dependency_overrides:
+            collection: ^1.19.1
+            google_mobile_ads: ^5.2.0
+            flutter_local_notifications: ^17.2.4
+          '''
+          content += '\n' + overrides
+          
           with open('pubspec.yaml', 'w') as f:
               f.write(content)
           "
