@@ -19,14 +19,14 @@ jobs:
           PROJECT_DIR=$(dirname $(find . -name "pubspec.yaml" -maxdepth 3 | head -n 1))
           cd "$PROJECT_DIR"
           
-          # إضافة التعديل بطريقة ذكية وآمنة بدون تكرار
+          # إضافة التعديلات والتجاوزات بطريقة آمنة بدون تكرار
           python3 -c "
           with open('pubspec.yaml', 'r') as f:
               content = f.read()
           if 'dependency_overrides:' in content:
-              content = content.replace('dependency_overrides:', 'dependency_overrides:\n  collection: ^1.19.1')
+              content = content.replace('dependency_overrides:', 'dependency_overrides:\n  collection: ^1.19.1\n  google_mobile_ads: ^5.4.0')
           else:
-              content += '\ndependency_overrides:\n  collection: ^1.19.1\n'
+              content += '\ndependency_overrides:\n  collection: ^1.19.1\n  google_mobile_ads: ^5.4.0\n'
           with open('pubspec.yaml', 'w') as f:
               f.write(content)
           "
