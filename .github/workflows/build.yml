@@ -1,0 +1,27 @@
+name: Build Flutter APK
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Extract ZIP file
+        run: |
+          mkdir -p project_folder
+          unzip Orange_flutter.zip -d project_folder
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+      - name: Build APK
+        run: |
+          cd project_folder
+          PROJECT_DIR=$(dirname $(find . -name "pubspec.yaml" -maxdepth 3 | head -n 1))
+          cd "$PROJECT_DIR"
+          flutter pub get
+          flutter build apk --release
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-release
+          path: '**/app-release.apk'
