@@ -45,11 +45,24 @@ jobs:
               f.write(content)
           "
           
-          # 1. جلب الحزم أولاً لتنزل في الكاش
+          # 1. جلب الحزم أولاً
           flutter pub get
           
-          # 2. تعديل ملفات الكاش فور تحميلها لتتطابق مع Gradle الحديث
-          find ~/.pub-cache -type f -name "build.gradle" -exec sed -i 's/configurations.all/configurations.configureEach/g' {} + || true
+          # 2. تعطيل السطر المعترض في حزمة الإعلانات بشكل نهائي
+          python3 -c "
+          import glob
+          for path in glob.glob('/home/runner/.pub-cache/**/google_mobile_ads**/android/build.gradle', recursive=True):
+              with open(path, 'r') as f:
+                  lines = f.readlines()
+              new_lines = []
+              for line in lines:
+                  if 'configurations' in line and ('all' in line or 'configureEach' in line):
+                      new_lines.append('// ' + line)
+                  else:
+                      new_lines.append(line)
+              with open(path, 'w') as f:
+                  f.writelines(new_lines)
+          "
           
           # 3. بناء التطبيق نهائياً
           flutter build apk --release
