@@ -18,6 +18,12 @@ jobs:
           cd project_folder
           PROJECT_DIR=$(dirname $(find . -name "pubspec.yaml" -maxdepth 3 | head -n 1))
           cd "$PROJECT_DIR"
+          
+          # حل مشكلة التعارض تلقائياً
+          echo "" >> pubspec.yaml
+          echo "dependency_overrides:" >> pubspec.yaml
+          echo "  collection: ^1.19.1" >> pubspec.yaml
+          
           flutter pub get
           flutter build apk --release
       - name: Upload APK
