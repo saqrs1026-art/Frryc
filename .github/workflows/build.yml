@@ -19,10 +19,17 @@ jobs:
           PROJECT_DIR=$(dirname $(find . -name "pubspec.yaml" -maxdepth 3 | head -n 1))
           cd "$PROJECT_DIR"
           
-          # حل مشكلة التعارض تلقائياً
-          echo "" >> pubspec.yaml
-          echo "dependency_overrides:" >> pubspec.yaml
-          echo "  collection: ^1.19.1" >> pubspec.yaml
+          # إضافة التعديل بطريقة ذكية وآمنة بدون تكرار
+          python3 -c "
+          with open('pubspec.yaml', 'r') as f:
+              content = f.read()
+          if 'dependency_overrides:' in content:
+              content = content.replace('dependency_overrides:', 'dependency_overrides:\n  collection: ^1.19.1')
+          else:
+              content += '\ndependency_overrides:\n  collection: ^1.19.1\n'
+          with open('pubspec.yaml', 'w') as f:
+              f.write(content)
+          "
           
           flutter pub get
           flutter build apk --release
